@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tab="brasil">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linhas do tempo da VA4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: duas linhas do tempo separadas (Brasil, EUA) em abas, mais uma aba de comparações. Trilho vertical com preenchimento animado. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#142033; --muted:#566377; --line:#d3dae5;
+  --br:#0b6a50; --br-soft:#def1ea; --on-br:#ffffff;
+  --us:#23408f; --us-soft:#e3e9f8; --on-us:#ffffff;
+  --cx:#142033; --cx-soft:#e6eaf0; --on-cx:#ffffff;
+  --accent:var(--br); --accent-soft:var(--br-soft); --on-accent:var(--on-br);
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1521; --surface:#162033; --ink:#e9eef6; --muted:#a0aec2; --line:#2a374d;
+    --br:#52d1a6; --br-soft:#123329; --on-br:#062018;
+    --us:#93abff; --us-soft:#1b2750; --on-us:#0a1230;
+    --cx:#e9eef6; --cx-soft:#1f2b40; --on-cx:#0e1521;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1521; --surface:#162033; --ink:#e9eef6; --muted:#a0aec2; --line:#2a374d;
+  --br:#52d1a6; --br-soft:#123329; --on-br:#062018;
+  --us:#93abff; --us-soft:#1b2750; --on-us:#0a1230;
+  --cx:#e9eef6; --cx-soft:#1f2b40; --on-cx:#0e1521;
+  color-scheme:dark;
+}
+:root[data-tab="brasil"]{--accent:var(--br);--accent-soft:var(--br-soft);--on-accent:var(--on-br)}
+:root[data-tab="eua"]{--accent:var(--us);--accent-soft:var(--us-soft);--on-accent:var(--on-us)}
+:root[data-tab="conexoes"]{--accent:var(--cx);--accent-soft:var(--cx-soft);--on-accent:var(--on-cx)}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 1.0625rem/1.55 var(--body)}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px 56px}
+header.top{padding:26px 16px 20px;margin:0 -16px;border-top:6px solid var(--accent);background:linear-gradient(180deg,var(--accent-soft),transparent)}
+header.top .eyebrow{font:700 .78rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font:800 clamp(1.9rem,5vw,2.8rem)/1.05 var(--display);margin:0 0 10px;text-wrap:balance}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 12px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tab{font:700 .98rem var(--body);padding:.5rem 1rem;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"][data-t="brasil"]{background:var(--br);border-color:var(--br);color:var(--on-br)}
+.tab[aria-selected="true"][data-t="eua"]{background:var(--us);border-color:var(--us);color:var(--on-us)}
+.tab[aria-selected="true"][data-t="conexoes"]{background:var(--cx);border-color:var(--cx);color:var(--on-cx)}
+.tools{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between}
+.chips-f{display:flex;gap:6px;flex-wrap:wrap}
+.chip-f{--tc:var(--muted);display:inline-flex;align-items:center;font:600 .88rem var(--body);padding:.3rem .7rem;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.chip-f[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.ctrls{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font:600 .92rem var(--body);padding:.45rem .85rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.btn svg{width:12px;height:12px;fill:currentColor}
+.tab:focus-visible,.chip-f:focus-visible,.btn:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.status{font:600 .85rem var(--body);color:var(--muted);min-height:1.2em;margin:8px 0 0;font-variant-numeric:tabular-nums}
+
+.legend{font-size:.88rem;color:var(--muted);margin:16px 0 4px}
+
+.tl{position:relative;padding-left:44px;margin-top:8px}
+.rail{position:absolute;left:15px;top:6px;bottom:6px;width:3px;background:var(--line);border-radius:2px}
+.rail i{display:block;width:100%;height:0;background:var(--accent);border-radius:2px;transition:height .7s ease}
+.phase header{margin:34px 0 14px;border-left:5px solid var(--accent);padding-left:12px}
+.phase:first-of-type header{margin-top:20px}
+.phase h2{font:800 1.3rem/1.2 var(--display);margin:0;text-wrap:balance}
+.phase header p{margin:4px 0 0;color:var(--accent);font-weight:700;font-size:.98rem}
+:root[data-tab="conexoes"] .phase header p{color:var(--ink)}
+.phase ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.card{position:relative;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px 14px;transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease}
+.card.hidden{display:none}
+.dot{position:absolute;left:-35px;top:19px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--line);transition:background .3s,border-color .3s}
+.card.ctx .dot{border-style:dashed}
+.card.active{border-color:var(--accent);transform:translateX(4px);box-shadow:0 6px 22px -10px var(--accent)}
+.card.active .dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;margin-bottom:4px}
+time{font:800 1rem var(--display);color:var(--ink);background:var(--accent-soft);border:1.5px solid var(--accent);padding:.2rem .65rem;border-radius:999px;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.tag{--tc:var(--muted);font:600 .8rem/1 var(--body);padding:.32rem .55rem;border-radius:6px;background:color-mix(in srgb,var(--tc) 18%,var(--surface));color:var(--ink);display:inline-flex;align-items:center}
+.tag[data-k]::before,.chip-f[data-k]::before{content:"";display:inline-block;width:.55em;height:.55em;border-radius:50%;background:var(--tc);margin-right:.4em}
+.tag[data-k="Poder"],.chip-f[data-k="Poder"]{--tc:#d08a00}
+.tag[data-k="Cidadania"],.chip-f[data-k="Cidadania"]{--tc:#0a86b4}
+.tag[data-k="Revoltas"],.chip-f[data-k="Revoltas"]{--tc:#d2453a}
+.tag[data-k="Expansão"],.chip-f[data-k="Expansão"]{--tc:#2f9a5f}
+.tag[data-k="Escravidão"],.chip-f[data-k="Escravidão"]{--tc:#a5602f}
+.tag[data-k="Guerra"],.chip-f[data-k="Guerra"]{--tc:#6b7e93}
+.tag[data-k="Memória"],.chip-f[data-k="Memória"]{--tc:#c04a9c}
+.tag.ctx{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
+.card h3{font:700 1.15rem/1.25 var(--display);margin:0 0 4px;text-wrap:balance}
+.card p{margin:0 0 8px;max-width:66ch}
+.cue{font-size:.95rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin:8px 0 0!important}
+.cue b{color:var(--ink);margin-right:6px}
+.hint{display:none;color:var(--muted);font-style:italic;margin:0!important}
+.tl.quiz .card{cursor:pointer}
+.tl.quiz .card:not(.shown) .hide-q{display:none}
+.tl.quiz .card:not(.shown) .hint{display:block}
+
+.cx{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.pair{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:16px}
+.pair h2{font:800 1.3rem/1.2 var(--display);margin:0 0 12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col{border-radius:10px;padding:12px 14px}
+.col.br{background:var(--br-soft)}
+.col.us{background:var(--us-soft)}
+.col h3{font:700 .8rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px}
+.col.br h3{color:var(--br)}
+.col.us h3{color:var(--us)}
+.col p{margin:0}
+.pair .cue{margin-top:12px!important}
+.foot{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.foot p{margin:0 0 6px;max-width:70ch}
+[hidden]{display:none!important}
+
+html.big{font-size:120%}
+.tools.cx .tl-only,.tools.cx #filters{display:none}
+
+.src-list,.st-list{margin:0 0 4px;padding-left:1.3em}
+.src-list li{margin:0 0 6px}
+.st-list{font-size:clamp(1.2rem,2.5vw,1.9rem);line-height:1.45;max-width:60ch}
+.st-list li{margin:0 0 .4em}
+
+/* Modo apresentação: um evento por tela, texto grande, para projetor */
+.stage{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column;gap:clamp(10px,2vh,24px);padding:clamp(14px,3vw,36px);border-top:8px solid var(--accent)}
+.stage.on{display:flex}
+.st-top{display:flex;justify-content:space-between;gap:12px 20px;align-items:flex-start;flex-wrap:wrap}
+.st-who{font:800 clamp(1.1rem,2.2vw,1.6rem) var(--display);color:var(--accent)}
+:root[data-tab="conexoes"] .st-who{color:var(--ink)}
+.st-phase{color:var(--muted);font-weight:600;font-size:clamp(.95rem,1.8vw,1.25rem)}
+.st-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.st-opt{display:inline-flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
+.st-opt input{width:20px;height:20px;accent-color:var(--accent)}
+.st-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.6vh,18px);width:100%;max-width:1100px;margin:0 auto;min-height:0;overflow:auto;padding:4px}
+.st-body.in{animation:inn .4s ease}
+@keyframes inn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+.st-date{font:800 clamp(2.4rem,7.5vw,5.8rem)/1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums;text-wrap:balance}
+:root[data-tab="conexoes"] .st-date{color:var(--ink)}
+.st-body .chips{gap:8px}
+.st-body .tag{font-size:clamp(.85rem,1.5vw,1.1rem)}
+.st-ans.veil{visibility:hidden}
+.st-title{font:800 clamp(1.8rem,4.8vw,3.7rem)/1.08 var(--display);margin:0 0 .3em;text-wrap:balance}
+.st-text{font-size:clamp(1.25rem,2.6vw,2.05rem);line-height:1.45;margin:0;max-width:56ch}
+.st-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.st-cols .col{padding:16px 18px}
+.st-cols .col h3{font-size:clamp(.9rem,1.6vw,1.1rem)}
+.st-cols .col p{font-size:clamp(1.1rem,2.3vw,1.75rem);line-height:1.4}
+.st-cue{margin:0;padding:.7em 1em;border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:0 10px 10px 0;font-size:clamp(1.05rem,2.1vw,1.6rem);max-width:60ch}
+.st-cue b{margin-right:.6em}
+.st-nav{display:flex;align-items:center;gap:14px;max-width:1100px;width:100%;margin:0 auto}
+.st-arrow{font-size:1.8rem;line-height:1;padding:.35rem 1.1rem}
+.map{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pip{width:15px;height:15px;border-radius:50%;border:2px solid var(--line);background:var(--surface);padding:0;cursor:pointer}
+.pip.seen{background:var(--accent-soft);border-color:var(--accent)}
+.pip.cur{background:var(--accent);border-color:var(--accent);transform:scale(1.4)}
+.pip.gap{margin-left:14px}
+.pip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.st-count{font:700 1rem var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.st-hint{margin:0;text-align:center;color:var(--muted);font-size:.9rem}
+
+@media (max-width:560px){
+  .st-cols{grid-template-columns:1fr}
+  .tl{padding-left:36px}
+  .dot{left:-30px}
+  .rail{left:11px}
+  .cols{grid-template-columns:1fr}
+  .tools{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">História · 8º ano · VA4</p>
+    <h1>Linhas do tempo para estudar</h1>
+    <p class="lede">Brasil Império e Estados Unidos no século XIX, em duas linhas separadas. Use Apresentar para projetar um evento por vez, em tela cheia. Reproduzir mostra a sequência nesta página, os temas têm cores para filtrar e Testar-me esconde as respostas.</p>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" role="tablist" aria-label="Escolha a linha do tempo">
+      <button class="tab" role="tab" data-t="brasil" id="tab-brasil" aria-selected="true">Brasil</button>
+      <button class="tab" role="tab" data-t="eua" id="tab-eua" aria-selected="false">Estados Unidos</button>
+      <button class="tab" role="tab" data-t="conexoes" id="tab-conexoes" aria-selected="false">Comparar os dois</button>
+    </div>
+    <div class="tools" id="tools">
+      <div class="chips-f" id="filters" role="group" aria-label="Filtrar por tema"></div>
+      <div class="ctrls">
+        <button class="btn primary" id="present" type="button">Apresentar</button>
+        <button class="btn tl-only" id="prev" type="button">Anterior</button>
+        <button class="btn tl-only" id="play" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg><span>Reproduzir</span></button>
+        <button class="btn tl-only" id="next" type="button">Próximo</button>
+        <button class="btn tl-only" id="reset" type="button">Reiniciar</button>
+        <button class="btn tl-only" id="quiz" type="button" aria-pressed="false">Testar-me</button>
+        <button class="btn" id="big" type="button" aria-pressed="false">Texto grande</button>
+        <button class="btn" id="theme" type="button">Tema claro/escuro</button>
+      </div>
+    </div>
+    <p class="status" id="status" aria-live="polite"></p>
+  </div>
+
+  <p class="legend" id="legend"></p>
+  <main id="main"></main>
+
+  <footer class="foot">
+    <p>Brasil: baseado nas aulas do 8º ano (Primeiro Reinado, Constituição de 1824, Golpe da Maioridade) e no edital de conteúdos do semestre.</p>
+    <p>Estados Unidos: síntese de História geral dos EUA. Confira datas e termos com o livro e o caderno.</p>
+    <p>Esta página organiza datas e contextos. As respostas da prova se constroem com caderno, livro, slides e a leitura atenta de cada fonte.</p>
+  </footer>
+</div>
+
+<div class="stage" id="stage" role="dialog" aria-modal="true" aria-label="Modo apresentação">
+  <div class="st-top">
+    <div><div class="st-who" id="st-who"></div><div class="st-phase" id="st-phase"></div></div>
+    <div class="st-actions">
+      <label class="st-opt"><input type="checkbox" id="st-ask"> Pergunta primeiro</label>
+      <button class="btn" id="st-fs" type="button">Tela cheia (F)</button>
+      <button class="btn" id="st-exit" type="button">Sair (Esc)</button>
+    </div>
+  </div>
+  <div class="st-body" id="st-body">
+    <div class="st-date" id="st-date"></div>
+    <div class="chips" id="st-tags"></div>
+    <div class="st-ans" id="st-ans"></div>
+    <p class="st-cue"><b id="st-cue-label"></b><span id="st-cue-text"></span></p>
+  </div>
+  <div class="st-nav">
+    <button class="btn st-arrow" id="st-prev" type="button" aria-label="Evento anterior">‹</button>
+    <div class="map" id="st-map"></div>
+    <span class="st-count" id="st-count" aria-live="polite"></span>
+    <button class="btn st-arrow primary" id="st-next" type="button" aria-label="Próximo">›</button>
+  </div>
+  <p class="st-hint">Setas, Espaço ou o passador de slides avançam. Esc sai.</p>
+</div>
+
+<script>
+const DATA = {
+  brasil: {
+    legend: "Linha pontilhada = contexto que ajuda a entender a sequência.",
+    phases: [
+      { name: "Independência e Primeiro Reinado (1822–1831)", q: "Quem deveria controlar o novo país?", ev: [
+        { d: "7 de setembro de 1822", t: "Independência: ruptura política", x: "O Brasil se separa de Portugal e precisa definir suas leis. A monarquia, a escravidão e o peso político dos grandes proprietários permanecem.", c: "Independência significou liberdade para todos?", g: ["Poder","Cidadania"] },
+        { d: "3 de maio de 1823", t: "Instala-se a Assembleia Constituinte", x: "Deputados eleitos, quase todos das elites, discutem a Constituição. O debate central é quanto poder o imperador deve ter. O projeto, apelidado de “Constituição da Mandioca”, limitava o imperador e fixava o voto pela renda, medida em farinha de mandioca. Não chegou a ser aprovado.", c: "Limitar o rei tornava o projeto democrático?", g: ["Poder"] },
+        { d: "12 de novembro de 1823", t: "Pedro I dissolve a Constituinte", x: "Na “Noite da Agonia”, tropas cercam a Assembleia e o imperador interrompe a elaboração da Constituição.", c: "Que contradição há entre defender a nação e dissolver seus representantes?", g: ["Poder"] },
+        { d: "25 de março de 1824", t: "Constituição outorgada", x: "Depois de dissolver a Constituinte, Pedro I nomeia um Conselho de Estado para redigir o texto, que passa a valer em 25 de março de 1824.", c: "Quem decidiu o conteúdo do texto? Compare dois caminhos possíveis para ter uma Constituição.", g: ["Poder"] },
+        { d: "1824 (art. 98)", t: "Poder Moderador", x: "A Constituição cria, além dos três poderes tradicionais, um quarto poder, previsto no art. 98 e exercido só pelo imperador. Estude as atribuições nos slides e no caderno.", c: "Que efeito esse poder tinha sobre os outros poderes?", g: ["Poder"] },
+        { d: "1824", t: "Voto censitário e indireto", x: "A Constituição organiza o voto em graus e exige renda mínima para votar, ser eleitor e ser candidato. Veja os valores e as exclusões nos slides.", c: "O que significa “cidadania restrita” numa sociedade escravista?", g: ["Cidadania"] },
+        { d: "Julho de 1824", t: "Confederação do Equador", x: "No Nordeste, a partir de Pernambuco, os rebeldes se opõem à dissolução da Constituinte e à concentração de poder no imperador. Frei Caneca critica o desequilíbrio entre os poderes. O movimento é reprimido.", c: "Que críticas o movimento fazia ao poder do imperador? Quem eram seus apoiadores?", g: ["Poder","Revoltas"] },
+        { d: "7 de abril de 1831", t: "Abdicação de Pedro I", x: "Em crise com as elites, Pedro I abdica. O sucessor, Pedro, tem 5 anos. Forma-se um governo temporário, a Regência, que dura até 1840.", c: "Por que a aclamação de Pedro II não significou que ele governava?", g: ["Poder"] }
+      ]},
+      { name: "Regências (1831–1840)", q: "Quem governa enquanto o imperador é criança?", ev: [
+        { d: "1831–1840", t: "Período Regencial", x: "Regentes governam durante a menoridade de Pedro II. Revoltas provinciais e disputas entre as elites colocam em questão o controle do Império.", c: "Por que o Império vivia uma crise de controle?", g: ["Poder"] },
+        { d: "1831", t: "Guarda Nacional", x: "Criada em 1831, a Guarda Nacional liga a defesa da ordem ao poder das elites locais.", c: "Como a Guarda Nacional se relaciona ao poder local?", g: ["Poder"] },
+        { d: "Janeiro de 1835", t: "Revolta dos Malês (Salvador)", x: "Africanos escravizados e libertos, com liderança muçulmana, enfrentam a escravidão e outras opressões. O levante é reprimido.", c: "Compare com a Cabanagem: local, participantes, reivindicações e repressão.", g: ["Revoltas","Cidadania"] },
+        { d: "1835–1840", t: "Cabanagem (Grão-Pará)", x: "Revolta no Grão-Pará, entre 1835 e 1840, que enfrentou forte repressão imperial.", c: "Quem participou e quem liderou? Compare com os Malês e a Farroupilha.", g: ["Revoltas"] },
+        { d: "1835–1845", t: "Farroupilha (Rio Grande do Sul)", x: "Revolta no Rio Grande do Sul, entre 1835 e 1845, encerrada por um acordo de paz.", c: "Quem eram os rebeldes e o que defendiam? Procure nos slides e no caderno.", g: ["Revoltas"] },
+        { d: "1837–1838", t: "Sabinada (Bahia)", x: "Militares e civis defendem a separação da Bahia até a maioridade de Pedro II. Forças legalistas retomam Salvador.", c: "Que projeto político a Sabinada defendia?", g: ["Revoltas"] },
+        { d: "1838–1841", t: "Balaiada (Maranhão e Piauí)", x: "Vaqueiros e artesãos enfrentam abusos e recrutamento forçado. Escravizados também lutam pela liberdade. Tropas combatem o movimento.", c: "As revoltas regenciais defendiam um único projeto político?", g: ["Revoltas"] },
+        { d: "23 de julho de 1840", t: "Golpe da Maioridade", x: "Em 23 de julho de 1840, a Assembleia declara a maioridade de Pedro II. A decisão põe fim ao governo dos regentes.", c: "Compare a idade de Pedro II em 1840 com a prevista na Constituição. Que grupos políticos defendiam a mudança?", g: ["Poder"] },
+        { d: "18 de julho de 1841", t: "Coroação de Pedro II", x: "Cerimônia de coroação de Pedro II. Começa o Segundo Reinado.", c: "Faça duas listas: o que mudou e o que continuou igual depois de 1840.", g: ["Poder","Cidadania"] }
+      ]}
+    ]
+  },
+  eua: {
+    legend: "Linha pontilhada = contexto que ajuda a entender a sequência.",
+    phases: [
+      { name: "Expansão e Destino Manifesto (1803–1849)", q: "Até onde os EUA deveriam crescer, e à custa de quem?", ev: [
+        { d: "1803", t: "Compra da Louisiana", x: "Os EUA compram da França um vasto território a oeste do rio Mississippi, por cerca de 15 milhões de dólares. O país praticamente dobra de tamanho.", c: "Como a compra abriu caminho para a Marcha para o Oeste?", g: ["Expansão"], k: true },
+        { d: "1830 e 1838–1839", t: "Remoção dos povos indígenas", x: "A Lei de Remoção, do governo de Andrew Jackson, autoriza retirar povos indígenas do Sudeste para terras a oeste do Mississippi. A Trilha das Lágrimas, dos cherokees, é uma marcha forçada em que muitos morrem.", c: "Quem pagou o preço da expansão?", g: ["Expansão"], k: true },
+        { d: "1845", t: "Destino Manifesto", x: "O jornalista John O’Sullivan usa a expressão em um artigo sobre a anexação de territórios. No mesmo ano, o Texas é anexado.", c: "Que justificativa a expressão oferece para a expansão? Considere quem escreveu, quando e para quem.", g: ["Expansão"] },
+        { d: "1846–1848", t: "Guerra com o México", x: "Pelo Tratado de Guadalupe Hidalgo (1848), os EUA ficam com cerca de metade do território mexicano, incluindo a Califórnia.", c: "Como o Destino Manifesto aparece nessa guerra?", g: ["Expansão","Guerra"], k: true },
+        { d: "1848–1849", t: "Corrida do ouro na Califórnia", x: "A descoberta de ouro atrai centenas de milhares de pessoas ao Oeste e acelera a ocupação do território.", c: "Por que o Oeste atraía tanta gente?", g: ["Expansão"], k: true }
+      ]},
+      { name: "Escravidão, secessão e guerra (1854–1865)", q: "O país crescia com ou sem escravidão?", ev: [
+        { d: "1854", t: "Lei Kansas-Nebraska", x: "Deixa os colonos decidirem se os novos territórios teriam escravidão. A disputa vira violência no Kansas e aprofunda a divisão entre Norte e Sul.", c: "Por que a expansão reabriu o debate sobre a escravidão?", g: ["Escravidão"], k: true },
+        { d: "1857", t: "Caso Dred Scott", x: "A Suprema Corte decide que pessoas negras, escravizadas ou livres, não eram cidadãs.", c: "O que esse caso diz sobre cidadania negra?", g: ["Escravidão","Cidadania"], k: true },
+        { d: "1860", t: "Eleição de Lincoln e secessão", x: "Abraham Lincoln, do Partido Republicano, contrário à expansão da escravidão, vence a eleição. Em seguida, estados do Sul declaram a secessão, a começar pela Carolina do Sul, em dezembro.", c: "Por que o Sul reagiu à eleição de Lincoln?", g: ["Escravidão","Guerra"], k: true },
+        { d: "12 de abril de 1861", t: "Fort Sumter: começa a Guerra de Secessão", x: "Os estados do Sul formam os Estados Confederados da América. O ataque ao Forte Sumter inicia a guerra entre Confederação e União, que dura até 1865.", c: "Quem eram os lados do conflito?", g: ["Guerra"] },
+        { d: "1862", t: "Lei Homestead", x: "Oferece lotes de terra no Oeste a quem os ocupasse e cultivasse. A Marcha para o Oeste continua mesmo durante a guerra.", c: "Que relação há entre terra, colonos e expansão?", g: ["Expansão"], k: true },
+        { d: "1º de janeiro de 1863", t: "Proclamação de Emancipação", x: "Lincoln declara livres as pessoas escravizadas nos territórios rebeldes e permite que homens negros se alistem no Exército da União. A guerra ganha um novo sentido: o fim da escravidão.", c: "O que a proclamação mudou nos objetivos da guerra?", g: ["Escravidão","Guerra"] },
+        { d: "Julho de 1863", t: "Batalha de Gettysburg", x: "A vitória da União é considerada um ponto de virada da guerra.", c: "Por que Gettysburg é lembrada como virada?", g: ["Guerra"], k: true },
+        { d: "9 de abril de 1865", t: "Fim da guerra", x: "O general confederado Robert E. Lee se rende em Appomattox. Dias depois, Lincoln é assassinado.", c: "Quem venceu e o que isso decidiu?", g: ["Guerra"], k: true },
+        { d: "Dezembro de 1865", t: "13ª Emenda", x: "Aprovada em 1865, a emenda trata do fim da escravidão no país. Leia o texto completo da seção 1 com atenção.", c: "O que a redação proíbe e o que deixa em aberto? Que lutas continuaram depois dela?", g: ["Escravidão","Cidadania"] }
+      ]},
+      { name: "Reconstrução e segregação (1865–1954)", q: "Liberdade na lei, igualdade na vida?", ev: [
+        { d: "1865–1866", t: "Black Codes e Ku Klux Klan", x: "Estados do Sul aprovam leis, os Black Codes, que limitam trabalho, circulação e direitos dos libertos. Surge a Ku Klux Klan, que usa violência contra pessoas negras e seus aliados.", c: "Como o Sul tentou manter o controle sobre os libertos?", g: ["Cidadania"], k: true },
+        { d: "1868 e 1870", t: "14ª e 15ª Emendas", x: "A 14ª garante cidadania e igual proteção das leis. A 15ª proíbe negar o voto por raça. Nas décadas seguintes, o Sul cria barreiras para impedir o voto negro.", c: "Por que direitos na lei nem sempre valiam na prática?", g: ["Cidadania"], k: true },
+        { d: "1877", t: "Fim da Reconstrução", x: "O governo federal retira suas tropas do Sul. Nas décadas seguintes, os estados sulistas consolidam as leis Jim Crow, que impõem a segregação racial.", c: "O que mudou no Sul depois de 1877?", g: ["Cidadania"], k: true },
+        { d: "1896", t: "Plessy v. Ferguson", x: "A Suprema Corte aceita a segregação em espaços públicos com a doutrina “separados, mas iguais”. A decisão dá respaldo legal ao sistema Jim Crow.", c: "Por que “separados, mas iguais” não significava igualdade?", g: ["Cidadania"] },
+        { d: "1954", t: "Brown v. Board of Education", x: "A Suprema Corte declara inconstitucional a segregação em escolas públicas, o que derruba a lógica de “separados, mas iguais” na educação.", c: "Quanto tempo a lógica de Plessy durou?", g: ["Cidadania"], k: true }
+      ]},
+      { name: "O passado no presente (os clipes)", q: "Como a história da escravidão e da segregação aparece hoje?", ev: [
+        { d: "2016", t: "Clipe “Formation” (Beyoncé)", x: "Videoclipe de 2016 analisado em aula.", c: "Quem produziu, em que contexto e com que perspectiva? Que ligações há com a história que você estudou?", g: ["Memória"] },
+        { d: "2018", t: "Clipe “This Is America” (Childish Gambino)", x: "Videoclipe de 2018 analisado em aula.", c: "Compare com o clipe de 2016: autoria, contexto e perspectiva.", g: ["Memória"] }
+      ]}
+    ]
+  }
+};
+
+const CONEXOES = [
+  { h: "Como interrogar uma fonte", src: true,
+    list: [
+      "Quem produziu o texto ou a imagem? (autoria)",
+      "Quando e onde foi produzido? (contexto)",
+      "Para quem e com que objetivo? (perspectiva)",
+      "O que a fonte afirma e o que ela não prova sozinha?",
+      "Em imagens: quais detalhes visuais chamam atenção e que leitura eles sustentam?"
+    ],
+    q: "Use estas perguntas diante de qualquer texto, imagem ou videoclipe." },
+  { h: "Cidadania restrita",
+    br: "Constituição de 1824: veja quem podia votar e quem podia ser eleito.",
+    us: "Do fim da escravidão (1865) à segregação legal (1896): compare os direitos na lei e na prática.",
+    q: "Em que sentido a cidadania era limitada nos dois países?" },
+  { h: "Poder central e regiões",
+    br: "Poder Moderador, Confederação do Equador e revoltas do período regencial.",
+    us: "Eleição de Lincoln, secessão e Guerra de Secessão.",
+    q: "Que disputas entre governo central e regiões aparecem em cada caso?" },
+  { h: "Mudanças e permanências",
+    br: "Os anos de 1840 e 1841.",
+    us: "Os anos de 1865 a 1877.",
+    q: "O que mudou e o que permaneceu em cada caso?" }
+];
+
+const $ = (s) => document.querySelector(s);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = (s) => String(s).replace(/[&<>]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m]));
+
+let tab = "brasil", filter = "Todos", quiz = false, playing = false, timer = null, idx = -1;
+
+function cardHtml(e) {
+  const tags = e.g.map((t) => `<span class="tag" data-k="${esc(t)}">${esc(t)}</span>`).join("") + (e.k ? `<span class="tag ctx">contexto</span>` : "");
+  return `<li class="card${e.k ? " ctx" : ""}" data-g="${esc(e.g.join("|"))}">
+    <span class="dot" aria-hidden="true"></span>
+    <div class="meta"><time>${esc(e.d)}</time><span class="chips">${tags}</span></div>
+    <div class="hide-q">
+      <h3>${esc(e.t)}</h3>
+      <p>${esc(e.x)}</p>
+      <p class="cue"><b>Para fixar</b>${esc(e.c)}</p>
+    </div>
+    <p class="hint">Toque para ver o evento</p>
+  </li>`;
+}
+
+function renderTimeline() {
+  const D = DATA[tab];
+  $("#main").innerHTML = `<div class="tl" id="tl"><div class="rail" aria-hidden="true"><i></i></div>` +
+    D.phases.map((p) => `<section class="phase"><header><h2>${esc(p.name)}</h2><p>${esc(p.q)}</p></header><ol>${p.ev.map(cardHtml).join("")}</ol></section>`).join("") + `</div>`;
+  $("#legend").textContent = D.legend;
+  const tags = [...new Set(D.phases.flatMap((p) => p.ev.flatMap((e) => e.g)))];
+  $("#filters").innerHTML = ["Todos", ...tags].map((t) => `<button class="chip-f" type="button" data-f="${esc(t)}"${t === "Todos" ? "" : ` data-k="${esc(t)}"`} aria-pressed="${t === filter}">${esc(t)}</button>`).join("");
+  $("#tl").classList.toggle("quiz", quiz);
+  applyFilter();
+  bindCards();
+}
+
+function renderConexoes() {
+  $("#main").innerHTML = `<div class="cx">` + CONEXOES.map((c) => c.src
+    ? `<article class="pair"><h2>${esc(c.h)}</h2><ol class="src-list">${c.list.map((t) => `<li>${esc(t)}</li>`).join("")}</ol><p class="cue"><b>Dica</b>${esc(c.q)}</p></article>`
+    : `<article class="pair"><h2>${esc(c.h)}</h2>
+      <div class="cols">
+        <div class="col br"><h3>Brasil</h3><p>${esc(c.br)}</p></div>
+        <div class="col us"><h3>EUA</h3><p>${esc(c.us)}</p></div>
+      </div>
+      <p class="cue"><b>Para discutir</b>${esc(c.q)}</p>
+    </article>`).join("") + `</div>`;
+  $("#legend").textContent = "Perguntas para pensar, sem resposta pronta. Use a linha de cada país para sustentar sua resposta com evidências.";
+}
+
+function cards() { return [...document.querySelectorAll("#tl .card:not(.hidden)")]; }
+
+function applyFilter() {
+  document.querySelectorAll("#tl .card").forEach((c) => {
+    const ok = filter === "Todos" || c.dataset.g.split("|").includes(filter);
+    c.classList.toggle("hidden", !ok);
+  });
+  document.querySelectorAll("#tl .phase").forEach((p) => {
+    p.hidden = !p.querySelector(".card:not(.hidden)");
+  });
+  idx = -1;
+  setActive(null);
+  status();
+}
+
+function fill(c) {
+  const rail = $("#tl .rail");
+  if (!rail) return;
+  const bar = rail.querySelector("i");
+  if (!c) { bar.style.height = "0px"; return; }
+  const dot = c.querySelector(".dot");
+  bar.style.height = (dot.getBoundingClientRect().top - rail.getBoundingClientRect().top + 7) + "px";
+}
+
+function setActive(c) {
+  document.querySelectorAll("#tl .card.active").forEach((x) => x.classList.remove("active"));
+  if (c) c.classList.add("active");
+  fill(c);
+}
+
+function status() {
+  const n = cards().length;
+  $("#status").textContent = idx < 0 ? `${n} eventos nesta linha do tempo` : `Evento ${idx + 1} de ${n}`;
+}
+
+function go(i) {
+  const cs = cards();
+  if (!cs.length) return;
+  idx = Math.max(0, Math.min(i, cs.length - 1));
+  const c = cs[idx];
+  if (quiz) c.classList.add("shown");
+  setActive(c);
+  c.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+  status();
+}
+
+function setPlayBtn() {
+  const b = $("#play");
+  b.querySelector("span").textContent = playing ? "Pausar" : "Reproduzir";
+  b.querySelector("svg").innerHTML = playing ? '<path d="M2 1h3v10H2zM7 1h3v10H7z"/>' : '<path d="M2 1l9 5-9 5z"/>';
+}
+
+function stop() {
+  playing = false;
+  clearInterval(timer);
+  timer = null;
+  setPlayBtn();
+}
+
+function step() {
+  if (idx >= cards().length - 1) { stop(); return; }
+  go(idx + 1);
+}
+
+function play() {
+  if (idx >= cards().length - 1) idx = -1;
+  playing = true;
+  setPlayBtn();
+  step();
+  timer = setInterval(step, 4200);
+}
+
+function bindCards() {
+  document.querySelectorAll("#tl .card").forEach((c) => {
+    c.addEventListener("click", () => {
+      if (!quiz) return;
+      c.classList.toggle("shown");
+      fill(document.querySelector("#tl .card.active"));
+    });
+    c.addEventListener("keydown", (ev) => {
+      if (quiz && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); c.click(); }
+    });
+  });
+  syncQuizFocus();
+}
+
+function syncQuizFocus() {
+  document.querySelectorAll("#tl .card").forEach((c) => {
+    if (quiz) { c.setAttribute("tabindex", "0"); c.setAttribute("role", "button"); }
+    else { c.removeAttribute("tabindex"); c.removeAttribute("role"); }
+  });
+}
+
+function show(t) {
+  stop();
+  tab = ["brasil", "eua", "conexoes"].includes(t) ? t : "brasil";
+  filter = "Todos";
+  idx = -1;
+  document.documentElement.dataset.tab = tab;
+  document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.t === tab)));
+  const isCx = tab === "conexoes";
+  $("#tools").classList.toggle("cx", isCx);
+  if (isCx) { renderConexoes(); $("#status").textContent = ""; }
+  else renderTimeline();
+  if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
+}
+
+document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => show(b.dataset.t)));
+window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if (t !== tab) show(t); });
+
+$("#filters").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".chip-f");
+  if (!b) return;
+  stop();
+  filter = b.dataset.f;
+  document.querySelectorAll(".chip-f").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  applyFilter();
+});
+$("#play").addEventListener("click", () => (playing ? stop() : play()));
+$("#next").addEventListener("click", () => { stop(); go(idx + 1); });
+$("#prev").addEventListener("click", () => { stop(); go(idx < 0 ? 0 : idx - 1); });
+$("#reset").addEventListener("click", () => {
+  stop();
+  idx = -1;
+  document.querySelectorAll("#tl .card.shown").forEach((c) => c.classList.remove("shown"));
+  setActive(null);
+  status();
+  window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+});
+$("#quiz").addEventListener("click", () => {
+  quiz = !quiz;
+  $("#quiz").setAttribute("aria-pressed", String(quiz));
+  const tl = $("#tl");
+  if (tl) {
+    tl.classList.toggle("quiz", quiz);
+    if (!quiz) tl.querySelectorAll(".card.shown").forEach((c) => c.classList.remove("shown"));
+    syncQuizFocus();
+    fill(tl.querySelector(".card.active"));
+  }
+});
+window.addEventListener("resize", () => fill(document.querySelector("#tl .card.active")));
+
+/* ---------- Modo apresentação ---------- */
+const stage = $("#stage");
+const WHO = { brasil: "Brasil", eua: "Estados Unidos", conexoes: "Brasil e EUA" };
+let st = { on: false, i: 0, rev: true, ask: false, fs: false };
+
+function stItems() {
+  if (tab === "conexoes") {
+    return CONEXOES.map((c) => ({ cx: true, src: c.src, list: c.list, d: c.h, c: c.q, br: c.br, us: c.us, phase: "Comparar os dois países", g: [] }));
+  }
+  const out = [];
+  DATA[tab].phases.forEach((p) => p.ev.forEach((e) => {
+    if (filter === "Todos" || e.g.includes(filter)) out.push({ ...e, phase: p.name });
+  }));
+  return out;
+}
+
+function stRender(animate) {
+  const items = stItems();
+  if (!items.length) return;
+  st.i = Math.max(0, Math.min(st.i, items.length - 1));
+  const e = items[st.i];
+  $("#st-who").textContent = WHO[tab];
+  $("#st-phase").textContent = e.phase;
+  $("#st-date").textContent = e.d;
+  $("#st-tags").innerHTML = e.g.map((t) => `<span class="tag" data-k="${esc(t)}">${esc(t)}</span>`).join("") + (e.k ? '<span class="tag ctx">contexto</span>' : "");
+  const ans = $("#st-ans");
+  ans.innerHTML = e.src ? `<ol class="st-list">${e.list.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>` : e.cx
+    ? `<div class="st-cols"><div class="col br"><h3>Brasil</h3><p>${esc(e.br)}</p></div><div class="col us"><h3>EUA</h3><p>${esc(e.us)}</p></div></div>`
+    : `<h2 class="st-title">${esc(e.t)}</h2><p class="st-text">${esc(e.x)}</p>`;
+  ans.classList.toggle("veil", !st.rev);
+  ans.setAttribute("aria-hidden", String(!st.rev));
+  $("#st-cue-label").textContent = st.ask ? "Pergunta" : (e.src ? "Dica" : e.cx ? "Para discutir" : "Para fixar");
+  $("#st-cue-text").textContent = e.c;
+  $("#st-count").textContent = `${st.i + 1} / ${items.length}`;
+  let last = null;
+  $("#st-map").innerHTML = items.map((x, k) => {
+    const gap = last !== null && x.phase !== last;
+    last = x.phase;
+    return `<button type="button" class="pip${k === st.i ? " cur" : k < st.i ? " seen" : ""}${gap ? " gap" : ""}" data-i="${k}" aria-label="Ir ao evento ${k + 1}"></button>`;
+  }).join("");
+  if (animate && !reduce) {
+    const b = $("#st-body");
+    b.classList.remove("in");
+    void b.offsetWidth;
+    b.classList.add("in");
+  }
+}
+
+function stNext() {
+  const n = stItems().length;
+  if (st.ask && !st.rev) { st.rev = true; stRender(false); return; }
+  if (st.i < n - 1) { st.i++; st.rev = !st.ask; stRender(true); }
+}
+function stPrev() {
+  if (st.ask && st.rev) { st.rev = false; stRender(false); return; }
+  if (st.i > 0) { st.i--; st.rev = true; stRender(true); }
+}
+
+function stOpen() {
+  stop();
+  st.i = Math.max(idx, 0);
+  st.rev = !st.ask;
+  st.on = true;
+  stage.classList.add("on");
+  document.body.style.overflow = "hidden";
+  stRender(true);
+  $("#st-next").focus();
+  stFullscreen();
+}
+function stFullscreen() {
+  try {
+    if (document.fullscreenElement) { document.exitFullscreen(); return; }
+    const p = stage.requestFullscreen && stage.requestFullscreen();
+    if (p && p.then) p.then(() => { st.fs = true; }).catch(() => {});
+  } catch (_) {}
+}
+function stClose() {
+  if (!st.on) return;
+  st.on = false;
+  stage.classList.remove("on");
+  document.body.style.overflow = "";
+  const was = st.fs;
+  st.fs = false;
+  if (was && document.fullscreenElement) { try { document.exitFullscreen(); } catch (_) {} }
+  if (tab !== "conexoes") go(st.i);
+}
+
+$("#present").addEventListener("click", stOpen);
+$("#st-exit").addEventListener("click", stClose);
+$("#st-fs").addEventListener("click", stFullscreen);
+$("#st-next").addEventListener("click", stNext);
+$("#st-prev").addEventListener("click", stPrev);
+$("#st-ask").addEventListener("change", (ev) => { st.ask = ev.target.checked; st.rev = !st.ask; stRender(false); });
+$("#st-map").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".pip");
+  if (!b) return;
+  st.i = Number(b.dataset.i);
+  st.rev = !st.ask;
+  stRender(true);
+});
+document.addEventListener("keydown", (ev) => {
+  if (!st.on) return;
+  const k = ev.key;
+  const onControl = ev.target.closest && ev.target.closest("button,input,label");
+  if (k === "Escape") { ev.preventDefault(); stClose(); }
+  else if (k === "ArrowRight" || k === "PageDown" || ((k === " " || k === "Enter") && !onControl)) { ev.preventDefault(); stNext(); }
+  else if (k === "ArrowLeft" || k === "PageUp") { ev.preventDefault(); stPrev(); }
+  else if (k === "Home") { ev.preventDefault(); st.i = 0; st.rev = !st.ask; stRender(true); }
+  else if (k === "End") { ev.preventDefault(); st.i = stItems().length - 1; st.rev = !st.ask; stRender(true); }
+  else if (k === "f" || k === "F") { stFullscreen(); }
+});
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && st.on && st.fs) stClose();
+});
+
+$("#big").addEventListener("click", () => {
+  const on = document.documentElement.classList.toggle("big");
+  $("#big").setAttribute("aria-pressed", String(on));
+  fill(document.querySelector("#tl .card.active"));
+});
+$("#theme").addEventListener("click", () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme === "dark" || (!r.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+  r.dataset.theme = dark ? "light" : "dark";
+  fill(document.querySelector("#tl .card.active"));
+});
+
+show(location.hash.slice(1) || "brasil");
+</script>
+</body>
+</html>
